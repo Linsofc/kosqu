@@ -21,6 +21,8 @@ class Penghuni extends Authenticatable
         'password',
         'no_hp',
         'tgl_masuk',
+        'tgl_jatuh_tempo',
+        'status',
     ];
 
     protected $hidden = [
@@ -38,6 +40,11 @@ class Penghuni extends Authenticatable
     public function kamar()
     {
         return $this->belongsTo(Kamar::class, 'id_kamar');
+    }
+
+    public function aktivitas()
+    {
+        return $this->hasMany(Aktivitas::class, 'id_penghuni');
     }
 
     public function transaksi()

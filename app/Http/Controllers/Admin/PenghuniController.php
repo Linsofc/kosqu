@@ -64,10 +64,21 @@ class PenghuniController extends Controller
             'nik' => 'required|string|max:20|unique:tb_penghuni,nik,' . $penghuni->id,
             'no_hp' => 'required|string|max:15',
             'tgl_masuk' => 'required|date',
+            'status' => 'required|in:Aktif,Keluar',
         ]);
 
-        // If room changed
-        if ($penghuni->id_kamar != $request->id_kamar) {
+        // Logic if status changes to Keluar
+        if ($penghuni->status != 'Keluar' && $request->status == 'Keluar') {
+            // Free the room
+            Kamar::find($penghuni->id_kamar)->update(['status' => 'Tersedia']);
+        } 
+        // Logic if status changes back to Aktif
+        elseif ($penghuni->status == 'Keluar' && $request->status == 'Aktif') {
+            // Re-occupy the room
+            Kamar::find($request->id_kamar)->update(['status' => 'Terisi']);
+        }
+        // If room changed while status is still Aktif
+        elseif ($penghuni->status == 'Aktif' && $request->status == 'Aktif' && $penghuni->id_kamar != $request->id_kamar) {
             // Free old room
             Kamar::find($penghuni->id_kamar)->update(['status' => 'Tersedia']);
             // Occupy new room
@@ -80,10 +91,10 @@ class PenghuniController extends Controller
             'nik' => $request->nik,
             'no_hp' => $request->no_hp,
             'tgl_masuk' => $request->tgl_masuk,
+            'status' => $request->status,
         ];
 
         if ($request->filled('password')) {
-            // Note: Do NOT use Hash::make() — the model's 'hashed' cast handles this.
             $data['password'] = $request->password;
         }
 

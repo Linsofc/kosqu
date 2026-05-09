@@ -47,6 +47,14 @@
                     <input type="date" name="tgl_masuk" value="{{ $penghuni->tgl_masuk }}" required style="width: 100%; box-sizing: border-box; padding: 0.8rem; border: 1px solid #E2E8F0; border-radius: 8px; background: #F8FAFC; outline: none;">
                     @error('tgl_masuk') <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ $message }}</div> @enderror
                 </div>
+                <div>
+                    <label style="display: block; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Status Akun</label>
+                    <select name="status" required style="width: 100%; box-sizing: border-box; padding: 0.8rem; border: 1px solid #E2E8F0; border-radius: 8px; background: #FFF; outline: none; font-weight: 600; color: {{ $penghuni->status == 'Aktif' ? '#22C55E' : '#EF4444' }};">
+                        <option value="Aktif" {{ $penghuni->status == 'Aktif' ? 'selected' : '' }} style="color: #22C55E;">Aktif</option>
+                        <option value="Keluar" {{ $penghuni->status == 'Keluar' ? 'selected' : '' }} style="color: #EF4444;">Keluar</option>
+                    </select>
+                    @error('status') <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ $message }}</div> @enderror
+                </div>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 1.25rem;">

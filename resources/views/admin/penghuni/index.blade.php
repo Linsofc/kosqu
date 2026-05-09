@@ -31,16 +31,16 @@
         </div>
         <div class="stat-info">
             <h3>STATUS AKTIF</h3>
-            <div class="value" style="color: #10B981;">{{ $penghunis->count() }}</div>
+            <div class="value" style="color: #10B981;">{{ $penghunis->where('status', 'Aktif')->count() }}</div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background: #FFF7ED; color: #F97316;">
-            <i class="fa-solid fa-bed"></i>
+        <div class="stat-icon" style="background: #FEF2F2; color: #DC2626;">
+            <i class="fa-solid fa-person-walking-arrow-right"></i>
         </div>
         <div class="stat-info">
-            <h3>KAMAR TERISI</h3>
-            <div class="value">{{ $penghunis->count() }}</div>
+            <h3>STATUS KELUAR</h3>
+            <div class="value" style="color: #DC2626;">{{ $penghunis->where('status', 'Keluar')->count() }}</div>
         </div>
     </div>
 </div>
@@ -115,8 +115,8 @@
                             <div>
                                 <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-main);">{{ $p->nama }}</div>
                                 <div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.2rem;">
-                                    <span style="width: 6px; height: 6px; background: #22C55E; border-radius: 50; display: inline-block;"></span>
-                                    <span style="font-size: 0.7rem; color: #22C55E; font-weight: 600;">Aktif</span>
+                                    <span style="width: 6px; height: 6px; background: {{ $p->status == 'Aktif' ? '#22C55E' : '#EF4444' }}; border-radius: 50%; display: inline-block;"></span>
+                                    <span style="font-size: 0.7rem; color: {{ $p->status == 'Aktif' ? '#22C55E' : '#EF4444' }}; font-weight: 600;">{{ $p->status }}</span>
                                 </div>
                             </div>
                         </div>

@@ -35,9 +35,19 @@ class LoginController extends Controller
             }
         } else {
             $credentials['nik'] = $request->username_or_nik;
+            $credentials['status'] = 'Aktif'; // Ensure only active residents can login
+            
             if (Auth::guard('penghuni')->attempt($credentials, $request->remember)) {
                 $request->session()->regenerate();
                 return redirect()->intended('/user/dashboard');
+            }
+
+            // Check if login failed because they moved out
+            $penghuni = \App\Models\Penghuni::where('nik', $request->username_or_nik)->first();
+            if ($penghuni && $penghuni->status === 'Keluar') {
+                throw ValidationException::withMessages([
+                    'username_or_nik' => ['Akun Anda sudah tidak aktif (Sudah Keluar). Silakan hubungi admin.'],
+                ]);
             }
         }
 

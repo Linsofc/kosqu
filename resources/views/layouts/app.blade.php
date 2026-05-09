@@ -28,7 +28,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{{ route('kamar.index') }}" class="nav-link {{ request()->routeIs('kamar.*') ? 'active' : '' }}">
                     <i class="fa-solid fa-bed"></i>
                     Data Kamar
                 </a>
