@@ -403,9 +403,120 @@ main {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    text-decoration: none;
 }
 
 .btn-primary:hover {
     background: var(--secondary);
     box-shadow: 0 4px 15px rgba(0, 95, 115, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: #F1F5F9;
+    color: var(--text-main);
+    padding: 0.6rem 1.2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: #E2E8F0;
+}
+
+/* Glass Inputs */
+.glass-input {
+    background: #F8FAFC;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    color: var(--text-main);
+    transition: all 0.3s ease;
+    width: 100%;
+    outline: none;
+}
+
+.glass-input:focus {
+    background: white;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+/* Table Refinements */
+.data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.data-table th {
+    padding: 1rem;
+    text-align: left;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+.data-table tr {
+    transition: all 0.2s ease;
+}
+
+.data-table tbody tr {
+    background: white;
+}
+
+.data-table tbody tr:hover {
+    background: #F8FBFC;
+    transform: scale(1.002);
+}
+
+.data-table td {
+    padding: 1rem;
+    border-top: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.data-table td:first-child {
+    border-left: 1px solid var(--glass-border);
+    border-radius: 12px 0 0 12px;
+}
+
+.data-table td:last-child {
+    border-right: 1px solid var(--glass-border);
+    border-radius: 0 12px 12px 0;
+}
+
+.action-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.action-btn.edit {
+    color: var(--warning);
+    background: #FFFBEB;
+}
+
+.action-btn.edit:hover {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.action-btn.delete {
+    color: var(--danger);
+    background: #FEF2F2;
+}
+
+.action-btn.delete:hover {
+    background: #FEE2E2;
+    color: #991B1B;
 }

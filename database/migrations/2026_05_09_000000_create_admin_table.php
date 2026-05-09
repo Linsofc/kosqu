@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tb_penghuni', function (Blueprint $table) {
+        Schema::create('tb_admin', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_kamar')->constrained('tb_kamar')->onDelete('restrict');
-            $table->string('nama', 100);
-            $table->string('nik', 20)->unique();
+            $table->string('username', 50)->unique();
             $table->string('password');
-            $table->string('no_hp', 15);
-            $table->date('tgl_masuk');
+            $table->string('nama_admin', 100);
             $table->rememberToken();
             $table->timestamps();
         });
@@ -29,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tb_penghuni');
+        Schema::dropIfExists('tb_admin');
     }
 };

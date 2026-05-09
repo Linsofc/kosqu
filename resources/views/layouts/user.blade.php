@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KOSQU - Management System</title>
+    <title>KOSQU - Tenant Portal</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,38 +17,38 @@
     <div class="sidebar">
         <div class="logo">
             <h2>KOSQU</h2>
-            <p>MANAGEMENT SYSTEM</p>
+            <p style="text-transform: capitalize; letter-spacing: 0;">Tenant Portal</p>
         </div>
 
         <ul class="nav-menu">
             <li class="nav-item">
-                <a href="/" class="nav-link {{ request()->is('/') ? 'active' : '' }}">
+                <a href="{{ url('/user/dashboard') }}" class="nav-link {{ request()->is('user/dashboard') ? 'active' : '' }}">
                     <i class="fa-solid fa-table-cells-large"></i>
                     Dashboard
                 </a>
             </li>
             <li class="nav-item">
                 <a href="#" class="nav-link">
-                    <i class="fa-solid fa-bed"></i>
-                    Data Kamar
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('penghuni.index') }}" class="nav-link {{ request()->routeIs('penghuni.*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-user-group"></i>
-                    Data Penghuni
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link">
                     <i class="fa-solid fa-file-invoice"></i>
-                    Transaksi & Validasi
+                    Invoices
                 </a>
             </li>
             <li class="nav-item">
                 <a href="#" class="nav-link">
-                    <i class="fa-solid fa-wallet"></i>
-                    Laporan Keuangan
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    Payment
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    History
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fa-regular fa-user"></i>
+                    Profile
                 </a>
             </li>
         </ul>
@@ -56,8 +56,8 @@
         <div class="sidebar-footer">
             <li class="nav-item" style="list-style: none;">
                 <a href="#" class="nav-link">
-                    <i class="fa-solid fa-gear"></i>
-                    Settings
+                    <i class="fa-regular fa-circle-question"></i>
+                    Help Center
                 </a>
             </li>
             <li class="nav-item" style="list-style: none;">
@@ -77,23 +77,20 @@
         <header>
             <div class="search-bar">
                 <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted); font-size: 0.9rem;"></i>
-                <input type="text" placeholder="Cari data...">
+                <input type="text" placeholder="Cari informasi...">
             </div>
             
             <div class="header-right">
                 <div class="notification-btn">
                     <i class="fa-regular fa-bell"></i>
-                    <div class="notification-dot"></div>
                 </div>
 
-                <div class="header-separator"></div>
+                <div class="notification-btn">
+                    <i class="fa-regular fa-circle-question"></i>
+                </div>
 
                 <div class="user-profile">
-                    <div style="text-align: right;">
-                        <div style="font-weight: 700; font-size: 0.95rem; color: #1E293B;">Admin Utama</div>
-                        <div style="font-size: 0.8rem; color: #94A3B8;">Super Admin</div>
-                    </div>
-                    <img src="{{ asset('images/admin-profile.jpg') }}" alt="Profile" class="profile-img">
+                    <img src="{{ asset('images/admin-profile.jpg') }}" alt="Profile" class="profile-img" style="border-radius: 50%; border: none;">
                 </div>
             </div>
         </header>

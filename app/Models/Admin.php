@@ -3,24 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class Penghuni extends Authenticatable
+class Admin extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $table = 'tb_penghuni';
+    protected $table = 'tb_admin';
 
     protected $fillable = [
-        'id_kamar',
-        'nama',
-        'nik',
+        'username',
         'password',
-        'no_hp',
-        'tgl_masuk',
+        'nama_admin',
     ];
 
     protected $hidden = [
@@ -33,15 +28,5 @@ class Penghuni extends Authenticatable
         return [
             'password' => 'hashed',
         ];
-    }
-
-    public function kamar()
-    {
-        return $this->belongsTo(Kamar::class, 'id_kamar');
-    }
-
-    public function transaksi()
-    {
-        return $this->hasMany(Transaksi::class, 'id_penghuni');
     }
 }
