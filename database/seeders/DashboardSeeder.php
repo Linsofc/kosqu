@@ -36,7 +36,7 @@ class DashboardSeeder extends Seeder
             [
                 'id_kamar' => $kamar104->id,
                 'nama' => 'Budi Santoso',
-                'password' => 'password123',
+                'password' => Hash::make('password123'),
                 'no_hp' => '081234567890',
                 'tgl_masuk' => Carbon::now()->subMonths(3),
                 'tgl_jatuh_tempo' => Carbon::now()->addDays(2),
@@ -50,7 +50,7 @@ class DashboardSeeder extends Seeder
             [
                 'id_kamar' => $kamar202->id,
                 'nama' => 'Siti Aminah',
-                'password' => 'password123',
+                'password' => Hash::make('password123'),
                 'no_hp' => '081234567891',
                 'tgl_masuk' => Carbon::now()->subMonths(1),
                 'tgl_jatuh_tempo' => Carbon::now()->addDays(15),
@@ -65,7 +65,7 @@ class DashboardSeeder extends Seeder
             [
                 'id_kamar' => $kamar303->id,
                 'nama' => 'Mantan Penghuni',
-                'password' => 'password123',
+                'password' => Hash::make('password123'),
                 'no_hp' => '081234567899',
                 'tgl_masuk' => Carbon::now()->subYear(),
                 'tgl_jatuh_tempo' => Carbon::now()->subMonths(6),

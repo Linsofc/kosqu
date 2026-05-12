@@ -14,19 +14,7 @@
     </div>
 </div>
 
-@if(session('success'))
-<div class="alert alert-success" id="auto-dismiss-alert">
-    <i class="fa-solid fa-circle-check"></i>
-    {{ session('success') }}
-</div>
-@endif
 
-@if(session('error'))
-<div class="alert alert-danger" id="auto-dismiss-alert">
-    <i class="fa-solid fa-circle-exclamation"></i>
-    {{ session('error') }}
-</div>
-@endif
 
 <div class="stats-grid" style="margin-bottom: 2rem; grid-template-columns: repeat(4, 1fr);">
     <div class="stat-card">
@@ -135,13 +123,11 @@
                             <button class="action-btn edit" onclick='openEditModal(@json($kamar))' title="Edit Kamar">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
-                            <form action="{{ route('kamar.destroy', $kamar) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kamar ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="action-btn delete" title="Hapus Kamar" {{ $kamar->status == 'Terisi' ? 'disabled style=opacity:0.5;cursor:not-allowed' : '' }}>
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </form>
+                            <button type="button" class="action-btn delete" title="Hapus Kamar" 
+                                onclick="confirmDeleteKamar('{{ route('kamar.destroy', $kamar) }}', '{{ $kamar->nomor_kamar }}')"
+                                {{ $kamar->status == 'Terisi' ? 'disabled style=opacity:0.5;cursor:not-allowed' : '' }}>
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -256,13 +242,32 @@
         toggleModal('editKamarModal');
     }
 
-    // Auto-dismiss alert
-    const alert = document.getElementById('auto-dismiss-alert');
-    if (alert) {
-        setTimeout(() => {
-            alert.style.opacity = '0';
-            setTimeout(() => alert.style.display = 'none', 500);
-        }, 3000);
+    function confirmDeleteKamar(actionUrl, nomorKamar) {
+        confirmAction({
+            title: 'Hapus Kamar?',
+            text: `Anda akan menghapus Unit Kamar ${nomorKamar}. Tindakan ini tidak dapat dibatalkan!`,
+            confirmText: 'Ya, Hapus Kamar',
+            callback: function() {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = actionUrl;
+                
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = '_token';
+                csrfToken.value = '{{ csrf_token() }}';
+                
+                const methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.name = '_method';
+                methodInput.value = 'DELETE';
+                
+                form.appendChild(csrfToken);
+                form.appendChild(methodInput);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
     }
 </script>
 

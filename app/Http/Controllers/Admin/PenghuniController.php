@@ -41,6 +41,7 @@ class PenghuniController extends Controller
             'nik' => $request->nik,
             'no_hp' => $request->no_hp,
             'tgl_masuk' => $request->tgl_masuk,
+            'tgl_jatuh_tempo' => $request->tgl_masuk,
             'password' => $request->password,
         ]);
 

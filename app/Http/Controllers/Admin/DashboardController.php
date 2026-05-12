@@ -43,10 +43,11 @@ class DashboardController extends Controller
         // === Okupansi ===
         $okupansi = $totalKamar > 0 ? round($kamarTerisi / $totalKamar * 100) : 0;
 
-        // === Jatuh Tempo (3 hari ke depan) ===
+        // === Jatuh Tempo (10 hari ke depan) ===
         $jatuhTempo = Penghuni::with('kamar')
+            ->where('status', 'Aktif')
             ->whereNotNull('tgl_jatuh_tempo')
-            ->whereBetween('tgl_jatuh_tempo', [$now->toDateString(), $now->copy()->addDays(3)->toDateString()])
+            ->where('tgl_jatuh_tempo', '<=', $now->copy()->addDays(10)->toDateString())
             ->orderBy('tgl_jatuh_tempo', 'asc')
             ->get();
 

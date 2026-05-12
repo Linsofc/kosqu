@@ -40,13 +40,25 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{{ route('transaksi.index') }}" class="nav-link {{ request()->routeIs('transaksi.*') ? 'active' : '' }}">
                     <i class="fa-solid fa-file-invoice"></i>
                     Transaksi & Validasi
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{{ route('pengumuman.index') }}" class="nav-link {{ request()->routeIs('pengumuman.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-bullhorn"></i>
+                    Pengumuman
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('tempo.index') }}" class="nav-link {{ request()->routeIs('tempo.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    Tempo Tagihan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('laporan.index') }}" class="nav-link {{ request()->routeIs('laporan.*') ? 'active' : '' }}">
                     <i class="fa-solid fa-wallet"></i>
                     Laporan Keuangan
                 </a>
@@ -55,7 +67,7 @@
 
         <div class="sidebar-footer">
             <li class="nav-item" style="list-style: none;">
-                <a href="#" class="nav-link">
+                <a href="{{ route('settings.index') }}" class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">
                     <i class="fa-solid fa-gear"></i>
                     Settings
                 </a>
@@ -103,6 +115,59 @@
         </main>
     </div>
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     @yield('scripts')
+
+    <script>
+        // Global SweetAlert Notification Handler
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                background: '#ffffff',
+                iconColor: '#10B981',
+                customClass: {
+                    popup: 'premium-swal-popup'
+                }
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: "{{ session('error') }}",
+                background: '#ffffff',
+                iconColor: '#EF4444',
+                confirmButtonColor: '#2563EB'
+            });
+        @endif
+
+        // Utility for confirmation dialogs
+        window.confirmAction = function(options) {
+            Swal.fire({
+                title: options.title || 'Apakah Anda yakin?',
+                text: options.text || "Tindakan ini tidak dapat dibatalkan!",
+                icon: options.icon || 'warning',
+                showCancelButton: true,
+                confirmButtonColor: options.confirmColor || '#EF4444',
+                cancelButtonColor: '#64748B',
+                confirmButtonText: options.confirmText || 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                background: '#ffffff',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed && options.callback) {
+                    options.callback();
+                }
+            });
+        }
+    </script>
 </body>
 </html>

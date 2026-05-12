@@ -22,6 +22,7 @@ class Penghuni extends Authenticatable
         'no_hp',
         'tgl_masuk',
         'tgl_jatuh_tempo',
+        'jumlah_tagihan',
         'status',
     ];
 

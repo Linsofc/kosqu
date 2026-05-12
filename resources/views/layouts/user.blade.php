@@ -28,25 +28,25 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{{ route('user.invoice') }}" class="nav-link {{ request()->routeIs('user.invoice') ? 'active' : '' }}">
                     <i class="fa-solid fa-file-invoice"></i>
                     Invoices
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{{ route('user.payment') }}" class="nav-link {{ request()->routeIs('user.payment') ? 'active' : '' }}">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
                     Payment
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{{ route('user.history') }}" class="nav-link {{ request()->routeIs('user.history') ? 'active' : '' }}">
                     <i class="fa-solid fa-clock-rotate-left"></i>
                     History
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{{ route('user.profile') }}" class="nav-link {{ request()->routeIs('user.profile') ? 'active' : '' }}">
                     <i class="fa-regular fa-user"></i>
                     Profile
                 </a>
@@ -100,6 +100,36 @@
         </main>
     </div>
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     @yield('scripts')
+
+    <script>
+        // Global SweetAlert Notification Handler for User
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                background: '#ffffff',
+                iconColor: '#10B981'
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: "{{ session('error') }}",
+                background: '#ffffff',
+                iconColor: '#EF4444',
+                confirmButtonColor: '#2563EB'
+            });
+        @endif
+    </script>
 </body>
 </html>

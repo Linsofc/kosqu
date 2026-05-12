@@ -45,18 +45,7 @@
     </div>
 </div>
 
-{{-- Success Alert --}}
-@if(session('success'))
-    <div id="success-alert" style="background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; padding: 1rem 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; animation: slideDown 0.3s ease;">
-        <div style="width: 32px; height: 32px; background: #D1FAE5; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-            <i class="fa-solid fa-circle-check" style="color: #10B981;"></i>
-        </div>
-        <span style="font-weight: 600; font-size: 0.9rem; flex-grow: 1;">{{ session('success') }}</span>
-        <button onclick="document.getElementById('success-alert').style.display='none'" style="background: none; border: none; color: #065F46; cursor: pointer; opacity: 0.5; font-size: 1.1rem;">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-    </div>
-@endif
+
 
 {{-- Data Table --}}
 <div class="widget">
@@ -187,35 +176,7 @@
     </div>
 </div>
 
-{{-- Delete Confirmation Modal --}}
-<div id="deleteModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px); transition: all 0.3s ease;">
-    <div style="background: #fff; padding: 2.5rem; border-radius: 20px; width: 90%; max-width: 420px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.15); animation: modalIn 0.3s ease;">
-        <div style="width: 64px; height: 64px; background: #FEF2F2; color: #EF4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 1.5rem auto;">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-        </div>
-        <h3 style="margin: 0 0 0.5rem 0; color: #1E293B; font-size: 1.25rem; font-weight: 700;">Konfirmasi Hapus</h3>
-        <p style="color: #64748B; font-size: 0.9rem; margin-bottom: 0.25rem; line-height: 1.6;">Anda akan menghapus data penghuni:</p>
-        <p id="deleteTargetName" style="color: var(--primary); font-weight: 700; font-size: 1rem; margin-bottom: 1.5rem;"></p>
-        <p style="color: #94A3B8; font-size: 0.8rem; margin-bottom: 2rem;">
-            <i class="fa-solid fa-circle-info" style="margin-right: 0.25rem;"></i>
-            Tindakan ini tidak dapat dibatalkan.
-        </p>
-        
-        <div style="display: flex; gap: 0.75rem;">
-            <button type="button" onclick="closeDeleteModal()" style="flex: 1; padding: 0.85rem 1.5rem; background: #F1F5F9; color: #475569; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s ease;">
-                Batal
-            </button>
-            <form id="deleteForm" method="POST" style="margin: 0; flex: 1; display: flex;">
-                @csrf
-                @method('DELETE')
-                <button type="submit" style="width: 100%; padding: 0.85rem 1.5rem; background: #EF4444; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                    <i class="fa-solid fa-trash-can"></i>
-                    Ya, Hapus
-                </button>
-            </form>
-        </div>
-    </div>
-</div>
+
 
 @endsection
 
@@ -247,33 +208,32 @@
 @section('scripts')
 <script>
     function openDeleteModal(actionUrl, name) {
-        document.getElementById('deleteForm').action = actionUrl;
-        document.getElementById('deleteTargetName').textContent = name;
-        document.getElementById('deleteModal').style.display = 'flex';
-    }
-
-    function closeDeleteModal() {
-        document.getElementById('deleteModal').style.display = 'none';
-        document.getElementById('deleteForm').action = '';
-        document.getElementById('deleteTargetName').textContent = '';
-    }
-
-    window.onclick = function(event) {
-        var modal = document.getElementById('deleteModal');
-        if (event.target == modal) {
-            closeDeleteModal();
-        }
-    }
-
-    // Auto-dismiss success alert after 5 seconds
-    const alert = document.getElementById('success-alert');
-    if (alert) {
-        setTimeout(() => {
-            alert.style.transition = 'all 0.3s ease';
-            alert.style.opacity = '0';
-            alert.style.transform = 'translateY(-10px)';
-            setTimeout(() => alert.remove(), 300);
-        }, 5000);
+        confirmAction({
+            title: 'Hapus Penghuni?',
+            text: `Anda akan menghapus data penghuni "${name}". Tindakan ini tidak dapat dibatalkan!`,
+            confirmText: 'Ya, Hapus Data',
+            callback: function() {
+                // Create a dynamic form to submit the delete request
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = actionUrl;
+                
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = '_token';
+                csrfToken.value = '{{ csrf_token() }}';
+                
+                const methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.name = '_method';
+                methodInput.value = 'DELETE';
+                
+                form.appendChild(csrfToken);
+                form.appendChild(methodInput);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
     }
 </script>
 @endsection
