@@ -13,30 +13,27 @@ class UserDashboardController extends Controller
     {
         $penghuni = Auth::guard('penghuni')->user();
         $penghuni->load('kamar');
-        $now = Carbon::now();
+        $today = Carbon::today();
 
         // === Status Hunian ===
         $kamar = $penghuni->kamar;
 
         // === Jatuh Tempo Berikutnya ===
         $tglJatuhTempo = $penghuni->tgl_jatuh_tempo
-            ? Carbon::parse($penghuni->tgl_jatuh_tempo)
+            ? Carbon::parse($penghuni->tgl_jatuh_tempo)->startOfDay()
             : null;
 
         $sisaHari = $tglJatuhTempo
-            ? (int) $now->diffInDays($tglJatuhTempo, false)
+            ? (int) $today->diffInDays($tglJatuhTempo, false)
             : null;
 
-        // === Status Pembayaran Bulan Ini ===
-        $bulanIni = $now->translatedFormat('F Y'); // e.g. "Mei 2026"
-
-        $transaksiValid = Transaksi::where('id_penghuni', $penghuni->id)
-            ->where('status_validasi', 'Valid')
-            ->whereMonth('created_at', $now->month)
-            ->whereYear('created_at', $now->year)
-            ->first();
-
-        $sudahBayarBulanIni = $transaksiValid !== null;
+        // === Status Pembayaran (Cumulative) ===
+        $statusPembayaran = $penghuni->statusPembayaran();
+        $sudahBayarBulanIni = ($statusPembayaran === 'Lunas');
+        $totalTagihan = $penghuni->totalTagihanPeriode();
+        $totalDibayar = $penghuni->totalDibayarPeriode();
+        $sisaTagihan = $penghuni->sisaTagihan();
+        $progressPersen = $penghuni->progressPembayaran();
 
         // === Tagihan Aktif (Pending terbaru) ===
         $tagihanAktif = Transaksi::where('id_penghuni', $penghuni->id)
@@ -51,7 +48,8 @@ class UserDashboardController extends Controller
             ->get();
 
         // === Pengumuman ===
-        $pengumumans = \App\Models\Pengumuman::orderBy('created_at', 'desc')->get();
+        $totalPengumuman = \App\Models\Pengumuman::count();
+        $pengumumans = \App\Models\Pengumuman::orderBy('created_at', 'desc')->take(10)->get();
 
         return view('user.dashboard', compact(
             'penghuni',
@@ -59,9 +57,15 @@ class UserDashboardController extends Controller
             'tglJatuhTempo',
             'sisaHari',
             'sudahBayarBulanIni',
+            'statusPembayaran',
+            'totalTagihan',
+            'totalDibayar',
+            'sisaTagihan',
+            'progressPersen',
             'tagihanAktif',
             'riwayatTransaksi',
-            'pengumumans'
+            'pengumumans',
+            'totalPengumuman'
         ));
     }
 }

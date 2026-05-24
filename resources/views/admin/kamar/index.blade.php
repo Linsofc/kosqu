@@ -16,14 +16,14 @@
 
 
 
-<div class="stats-grid" style="margin-bottom: 2rem; grid-template-columns: repeat(4, 1fr);">
+<div class="stats-grid" style="margin-bottom: 2rem; grid-template-columns: repeat(3, 1fr);">
     <div class="stat-card">
         <div class="stat-icon" style="background: #E0F2FE; color: #0369A1;">
             <i class="fa-solid fa-bed"></i>
         </div>
         <div class="stat-info">
             <h3>TOTAL UNIT</h3>
-            <div class="value">{{ $totalKamar }}</div>
+            <div class="value" id="stat-total">{{ $totalKamar }}</div>
             <div style="font-size: 0.75rem; margin-top: 0.4rem; color: var(--text-muted);">Kapasitas Total</div>
         </div>
     </div>
@@ -33,7 +33,7 @@
         </div>
         <div class="stat-info">
             <h3>TERSEDIA</h3>
-            <div class="value" style="color: #059669;">{{ $tersedia }}</div>
+            <div class="value" style="color: #059669;" id="stat-tersedia">{{ $tersedia }}</div>
             <div style="font-size: 0.75rem; margin-top: 0.4rem; color: var(--text-muted);">Unit Siap Huni</div>
         </div>
     </div>
@@ -43,18 +43,8 @@
         </div>
         <div class="stat-info">
             <h3>TERISI</h3>
-            <div class="value" style="color: #D97706;">{{ $terisi }}</div>
+            <div class="value" style="color: #D97706;" id="stat-terisi">{{ $terisi }}</div>
             <div style="font-size: 0.75rem; margin-top: 0.4rem; color: var(--text-muted);">Unit Sedang Disewa</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon" style="background: #E0F2FE; color: #2563EB;">
-            <i class="fa-solid fa-bookmark"></i>
-        </div>
-        <div class="stat-info">
-            <h3>BOOKING</h3>
-            <div class="value" style="color: #2563EB;">{{ $booking }}</div>
-            <div style="font-size: 0.75rem; margin-top: 0.4rem; color: var(--text-muted);">Unit Dipesan</div>
         </div>
     </div>
 </div>
@@ -63,18 +53,20 @@
     <div class="widget-header" style="margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
         <div class="widget-title">Daftar Kamar</div>
         
-        <form action="{{ route('kamar.index') }}" method="GET" style="display: flex; gap: 1rem; flex-grow: 1; max-width: 600px;">
+        <div style="display: flex; gap: 1rem; flex-grow: 1; max-width: 600px;">
             <div style="position: relative; flex-grow: 1;">
                 <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
-                <input type="text" name="search" placeholder="Cari nomor kamar..." value="{{ request('search') }}" style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; border-radius: 10px; border: 1px solid #E2E8F0; outline: none; font-size: 0.9rem;">
+                <input type="text" id="search-input" placeholder="Cari nomor kamar..." value="{{ request('search') }}" style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; border-radius: 10px; border: 1px solid #E2E8F0; outline: none; font-size: 0.9rem;">
             </div>
-            <select name="status" onchange="this.form.submit()" style="padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #E2E8F0; background: white; outline: none; font-size: 0.9rem;">
-                <option value="">Semua Status</option>
-                <option value="Tersedia" {{ request('status') == 'Tersedia' ? 'selected' : '' }}>Tersedia</option>
-                <option value="Terisi" {{ request('status') == 'Terisi' ? 'selected' : '' }}>Terisi</option>
-                <option value="Booking" {{ request('status') == 'Booking' ? 'selected' : '' }}>Booking</option>
+            <select id="filter-status" style="padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #E2E8F0; background: white; outline: none; font-size: 0.9rem; cursor: pointer;">
+                <option value="Semua">Semua Status</option>
+                <option value="Tersedia">Tersedia</option>
+                <option value="Terisi">Terisi</option>
             </select>
-        </form>
+            <button type="button" id="btn-reset" onclick="resetFilters()" style="padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #E2E8F0; background: white; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-rotate-right"></i> Reset
+            </button>
+        </div>
     </div>
 
     <div class="data-table-container">
@@ -88,62 +80,13 @@
                     <th>AKSI</th>
                 </tr>
             </thead>
-            <tbody>
-                @forelse($kamars as $kamar)
-                <tr>
-                    <td>
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <div style="width: 40px; height: 40px; background: #F1F5F9; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--primary);">
-                                {{ $kamar->nomor_kamar }}
-                            </div>
-                            <span style="font-weight: 600;">Unit {{ $kamar->nomor_kamar }}</span>
-                        </div>
-                    </td>
-                    <td>
-                        <div style="font-weight: 700; color: var(--primary);">Rp {{ number_format($kamar->harga_sewa, 0, ',', '.') }}</div>
-                        <div style="font-size: 0.7rem; color: var(--text-muted);">per bulan</div>
-                    </td>
-                    <td>
-                        <div style="font-size: 0.85rem; max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ $kamar->fasilitas }}">
-                            {{ $kamar->fasilitas ?? 'Tidak ada data fasilitas' }}
-                        </div>
-                    </td>
-                    <td>
-                        @php
-                            $badgeClass = 'badge-success';
-                            if($kamar->status == 'Terisi') $badgeClass = 'badge-warning';
-                            if($kamar->status == 'Booking') $badgeClass = 'badge-info';
-                        @endphp
-                        <span class="badge {{ $badgeClass }}">
-                            {{ $kamar->status }}
-                        </span>
-                    </td>
-                    <td>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button class="action-btn edit" onclick='openEditModal(@json($kamar))' title="Edit Kamar">
-                                <i class="fa-solid fa-pen-to-square"></i>
-                            </button>
-                            <button type="button" class="action-btn delete" title="Hapus Kamar" 
-                                onclick="confirmDeleteKamar('{{ route('kamar.destroy', $kamar) }}', '{{ $kamar->nomor_kamar }}')"
-                                {{ $kamar->status == 'Terisi' ? 'disabled style=opacity:0.5;cursor:not-allowed' : '' }}>
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-muted);">
-                        <i class="fa-solid fa-bed" style="font-size: 3rem; opacity: 0.2; margin-bottom: 1rem; display: block;"></i>
-                        Belum ada data kamar yang sesuai.
-                    </td>
-                </tr>
-                @endforelse
+            <tbody id="kamar-tbody" style="transition: opacity 0.2s;">
+                @include('admin.kamar._table_rows', ['kamars' => $kamars])
             </tbody>
         </table>
     </div>
     
-    <div style="margin-top: 1.5rem;">
+    <div id="pagination-container" style="margin-top: 1.5rem;">
         {{ $kamars->links() }}
     </div>
 </div>
@@ -170,7 +113,6 @@
                 <select name="status" required>
                     <option value="Tersedia">Tersedia</option>
                     <option value="Terisi">Terisi</option>
-                    <option value="Booking">Booking</option>
                 </select>
             </div>
             <div class="form-group">
@@ -208,7 +150,6 @@
                 <select name="status" id="edit_status" required>
                     <option value="Tersedia">Tersedia</option>
                     <option value="Terisi">Terisi</option>
-                    <option value="Booking">Booking</option>
                 </select>
             </div>
             <div class="form-group">
@@ -269,6 +210,76 @@
             }
         });
     }
+
+    let searchTimeout;
+    const searchInput = document.getElementById('search-input');
+    const filterStatus = document.getElementById('filter-status');
+    const tbody = document.getElementById('kamar-tbody');
+    const paginationContainer = document.getElementById('pagination-container');
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => fetchData(), 300);
+    });
+
+    filterStatus.addEventListener('change', () => fetchData());
+
+    function fetchData(pageUrl = null) {
+        const search = searchInput.value.trim();
+        const status = filterStatus.value;
+
+        tbody.style.opacity = '0.5';
+
+        const params = new URLSearchParams();
+        if (search) params.append('search', search);
+        if (status !== 'Semua') params.append('status', status);
+
+        const url = pageUrl || `{{ route('kamar.index') }}?${params.toString()}`;
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            tbody.innerHTML = data.html;
+            paginationContainer.innerHTML = data.pagination;
+            
+            document.getElementById('stat-total').textContent = data.total;
+            document.getElementById('stat-tersedia').textContent = data.tersedia;
+            document.getElementById('stat-terisi').textContent = data.terisi;
+            
+            tbody.style.opacity = '1';
+            
+            // Re-attach pagination event listeners
+            attachPaginationEvents();
+        })
+        .catch(err => {
+            console.error('Fetch error:', err);
+            tbody.style.opacity = '1';
+        });
+    }
+
+    function resetFilters() {
+        searchInput.value = '';
+        filterStatus.value = 'Semua';
+        fetchData();
+    }
+
+    function attachPaginationEvents() {
+        const links = paginationContainer.querySelectorAll('a');
+        links.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                fetchData(this.href);
+            });
+        });
+    }
+
+    // Attach initial pagination events
+    document.addEventListener('DOMContentLoaded', attachPaginationEvents);
 </script>
 
 <style>

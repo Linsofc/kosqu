@@ -32,7 +32,8 @@ class UserProfileController extends Controller
         $user->no_hp = $request->no_hp;
 
         if ($request->filled('new_password')) {
-            $user->password = Hash::make($request->new_password);
+            // Jangan gunakan Hash::make() karena model sudah mengatur cast 'password' => 'hashed'
+            $user->password = $request->new_password;
         }
 
         $user->save();

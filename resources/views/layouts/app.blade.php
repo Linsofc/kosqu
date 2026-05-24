@@ -40,6 +40,12 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a href="{{ route('booking.index') }}" class="nav-link {{ request()->routeIs('booking.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-calendar-plus"></i>
+                    Booking
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="{{ route('transaksi.index') }}" class="nav-link {{ request()->routeIs('transaksi.*') ? 'active' : '' }}">
                     <i class="fa-solid fa-file-invoice"></i>
                     Transaksi & Validasi
@@ -87,23 +93,13 @@
 
     <div class="main-content">
         <header>
-            <div class="search-bar">
-                <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted); font-size: 0.9rem;"></i>
-                <input type="text" placeholder="Cari data...">
-            </div>
+            <div style="flex-grow: 1;"></div>
             
             <div class="header-right">
-                <div class="notification-btn">
-                    <i class="fa-regular fa-bell"></i>
-                    <div class="notification-dot"></div>
-                </div>
-
-                <div class="header-separator"></div>
-
                 <div class="user-profile">
                     <div style="text-align: right;">
-                        <div style="font-weight: 700; font-size: 0.95rem; color: #1E293B;">Admin Utama</div>
-                        <div style="font-size: 0.8rem; color: #94A3B8;">Super Admin</div>
+                        <div style="font-weight: 700; font-size: 0.95rem; color: #1E293B;">{{ auth('admin')->user()->nama_admin ?? 'Admin' }}</div>
+                        <div style="font-size: 0.8rem; color: #94A3B8;">Administrator</div>
                     </div>
                     <img src="{{ asset('images/admin-profile.jpg') }}" alt="Profile" class="profile-img">
                 </div>

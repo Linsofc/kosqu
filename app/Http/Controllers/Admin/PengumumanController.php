@@ -8,9 +8,28 @@ use Illuminate\Http\Request;
 
 class PengumumanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pengumumans = Pengumuman::orderBy('created_at', 'desc')->get();
+        if ($request->ajax()) {
+            $query = Pengumuman::orderBy('created_at', 'desc');
+            
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('judul', 'like', "%{$search}%")
+                      ->orWhere('konten', 'like', "%{$search}%");
+                });
+            }
+            
+            $pengumumans = $query->paginate(10);
+            
+            return response()->json([
+                'html' => view('admin.pengumuman._grid_items', compact('pengumumans'))->render(),
+                'pagination' => (string) $pengumumans->links(),
+            ]);
+        }
+
+        $pengumumans = Pengumuman::orderBy('created_at', 'desc')->paginate(10);
         return view('admin.pengumuman.index', compact('pengumumans'));
     }
 

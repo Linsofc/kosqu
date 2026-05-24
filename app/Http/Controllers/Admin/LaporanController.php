@@ -59,6 +59,15 @@ class LaporanController extends Controller
             $years = collect([Carbon::now()->year]);
         }
 
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('admin.laporan._table_rows', compact('transaksis'))->render(),
+                'monthlyData' => $monthlyData,
+                'totalFiltered' => $transaksis->sum('jumlah_bayar'),
+                'totalCount' => $transaksis->count(),
+            ]);
+        }
+
         return view('admin.laporan.index', compact(
             'totalPendapatan',
             'pendapatanBulanIni',
@@ -69,5 +78,27 @@ class LaporanController extends Controller
             'month',
             'years'
         ));
+    }
+
+    public function export(Request $request)
+    {
+        $year = $request->get('year', Carbon::now()->year);
+        $month = $request->get('month');
+
+        $query = Transaksi::with(['penghuni.kamar'])
+            ->where('status_validasi', 'Valid')
+            ->whereYear('created_at', $year);
+
+        if ($request->filled('month')) {
+            $query->whereMonth('created_at', $month);
+        }
+
+        $transaksis = $query->orderBy('created_at', 'desc')->get();
+        $totalPendapatan = $transaksis->sum('jumlah_bayar');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.laporan.pdf', compact('transaksis', 'totalPendapatan', 'year', 'month'));
+        
+        $filename = 'Laporan_Keuangan_KOSQU_' . $year . ($month ? '_Bulan_'.$month : '') . '.pdf';
+        return $pdf->download($filename);
     }
 }

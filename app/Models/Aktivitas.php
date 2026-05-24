@@ -23,6 +23,6 @@ class Aktivitas extends Model
 
     public function penghuni()
     {
-        return $this->belongsTo(Penghuni::class, 'id_penghuni');
+        return $this->belongsTo(Penghuni::class, 'id_penghuni')->withTrashed();
     }
 }

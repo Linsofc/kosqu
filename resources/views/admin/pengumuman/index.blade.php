@@ -11,40 +11,106 @@
     </a>
 </div>
 
-<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
-    @forelse($pengumumans as $p)
-    <div class="widget" style="padding: 1.5rem; position: relative;">
-        <div style="display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1rem;">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: {{ $p->warna_bg }}; color: {{ $p->warna_ikon }}; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
-                <i class="fa-solid {{ $p->ikon }}"></i>
-            </div>
-            <div style="flex-grow: 1;">
-                <h3 style="font-weight: 800; color: #1E293B; font-size: 1.1rem; margin-bottom: 0.25rem;">{{ $p->judul }}</h3>
-                <p style="font-size: 0.75rem; color: #94A3B8; font-weight: 600;">{{ $p->created_at->translatedFormat('d F Y • H:i') }}</p>
-            </div>
-        </div>
-        <div style="color: #64748B; font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem;">
-            {{ Str::limit($p->konten, 150) }}
-        </div>
-        <div style="display: flex; gap: 0.5rem; border-top: 1px solid #F1F5F9; padding-top: 1rem;">
-            <a href="{{ route('pengumuman.edit', $p->id) }}" style="flex-grow: 1; padding: 0.6rem; background: #F1F5F9; color: #475569; border-radius: 8px; text-align: center; text-decoration: none; font-weight: 700; font-size: 0.85rem; transition: all 0.2s;">
-                <i class="fa-solid fa-pen-to-square"></i> Edit
-            </a>
-            <form action="{{ route('pengumuman.destroy', $p->id) }}" method="POST" style="flex-grow: 1;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengumuman ini?')">
-                @csrf
-                @method('DELETE')
-                <button type="submit" style="width: 100%; padding: 0.6rem; background: #FEF2F2; color: #DC2626; border-radius: 8px; border: none; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
-                    <i class="fa-solid fa-trash"></i> Hapus
-                </button>
-            </form>
-        </div>
+<div class="widget" style="margin-top: 2rem; padding: 1.5rem; display: flex; gap: 1rem; align-items: center;">
+    <div style="position: relative; flex-grow: 1;">
+        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem;"></i>
+        <input type="text" id="search-input" value="{{ request('search') }}" placeholder="Cari judul atau isi pengumuman..." style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; border-radius: 10px; border: 1px solid #E2E8F0; outline: none; font-size: 0.9rem;">
     </div>
-    @empty
-    <div style="grid-column: 1 / -1; text-align: center; padding: 5rem 2rem;">
-        <i class="fa-solid fa-bullhorn" style="font-size: 4rem; color: #E2E8F0; margin-bottom: 1.5rem;"></i>
-        <h3 style="color: #94A3B8; font-weight: 600;">Belum ada pengumuman.</h3>
-        <p style="color: #CBD5E1; font-size: 0.9rem; margin-top: 0.5rem;">Terbitkan pengumuman pertama Anda untuk memberikan informasi kepada penghuni.</p>
-    </div>
-    @endforelse
 </div>
+
+<div id="pengumuman-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; transition: opacity 0.2s;">
+    @include('admin.pengumuman._grid_items', ['pengumumans' => $pengumumans])
+</div>
+
+<div id="pagination-container" style="margin-top: 2rem;">
+    {{ $pengumumans->links() }}
+</div>
+@endsection
+
+@section('scripts')
+<script>
+    function attachDeleteEvents() {
+        document.querySelectorAll('.delete-pengumuman-form').forEach(form => {
+            // Remove existing listener to avoid duplicates if re-attached
+            form.replaceWith(form.cloneNode(true));
+        });
+        
+        document.querySelectorAll('.delete-pengumuman-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formEl = this;
+                Swal.fire({
+                    title: 'Hapus Pengumuman?',
+                    text: 'Pengumuman yang dihapus tidak dapat dikembalikan.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#DC2626',
+                    cancelButtonColor: '#64748B',
+                    confirmButtonText: '<i class="fa-solid fa-trash"></i> Ya, Hapus',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        formEl.submit();
+                    }
+                });
+            });
+        });
+    }
+
+    let searchTimeout;
+    const searchInput = document.getElementById('search-input');
+    const grid = document.getElementById('pengumuman-grid');
+    const paginationContainer = document.getElementById('pagination-container');
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => fetchData(), 300);
+    });
+
+    function fetchData(pageUrl = null) {
+        const search = searchInput.value.trim();
+        grid.style.opacity = '0.5';
+
+        const params = new URLSearchParams();
+        if (search) params.append('search', search);
+
+        const url = pageUrl || `{{ route('pengumuman.index') }}?${params.toString()}`;
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            grid.innerHTML = data.html;
+            paginationContainer.innerHTML = data.pagination;
+            grid.style.opacity = '1';
+            
+            attachPaginationEvents();
+            attachDeleteEvents();
+        })
+        .catch(err => {
+            console.error('Fetch error:', err);
+            grid.style.opacity = '1';
+        });
+    }
+
+    function attachPaginationEvents() {
+        const links = paginationContainer.querySelectorAll('a');
+        links.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                fetchData(this.href);
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        attachPaginationEvents();
+        attachDeleteEvents();
+    });
+</script>
 @endsection

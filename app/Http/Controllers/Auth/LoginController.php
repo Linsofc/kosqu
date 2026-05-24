@@ -11,6 +11,14 @@ class LoginController extends Controller
 {
     public function showLoginForm()
     {
+        if (Auth::guard('admin')->check()) {
+            return redirect()->route('admin.dashboard');
+        }
+        
+        if (Auth::guard('penghuni')->check()) {
+            return redirect()->route('user.dashboard');
+        }
+
         return view('auth.login');
     }
 
@@ -42,11 +50,11 @@ class LoginController extends Controller
                 return redirect()->intended('/user/dashboard');
             }
 
-            // Check if login failed because they moved out
-            $penghuni = \App\Models\Penghuni::where('nik', $request->username_or_nik)->first();
-            if ($penghuni && $penghuni->status === 'Keluar') {
+            // Check if login failed because they moved out or deleted
+            $penghuni = \App\Models\Penghuni::withTrashed()->where('nik', $request->username_or_nik)->first();
+            if ($penghuni && ($penghuni->status === 'Keluar' || $penghuni->trashed())) {
                 throw ValidationException::withMessages([
-                    'username_or_nik' => ['Akun Anda sudah tidak aktif (Sudah Keluar). Silakan hubungi admin.'],
+                    'username_or_nik' => ['Akun Anda telah dinonaktifkan (Sudah Checkout). Silakan hubungi admin jika ini adalah kesalahan.'],
                 ]);
             }
         }

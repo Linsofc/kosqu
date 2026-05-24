@@ -1,16 +1,27 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    function formatRupiahShort($amount) {
+        if ($amount >= 1_000_000_000) {
+            $val = $amount / 1_000_000_000;
+            return 'Rp ' . rtrim(rtrim(number_format($val, 2, '.', ''), '0'), '.') . 'M';
+        } elseif ($amount >= 1_000_000) {
+            $val = $amount / 1_000_000;
+            return 'Rp ' . rtrim(rtrim(number_format($val, 2, '.', ''), '0'), '.') . 'jt';
+        } elseif ($amount >= 1_000) {
+            $val = $amount / 1_000;
+            return 'Rp ' . rtrim(rtrim(number_format($val, 1, '.', ''), '0'), '.') . 'rb';
+        }
+        return 'Rp ' . number_format($amount, 0, ',', '.');
+    }
+@endphp
 <div class="dashboard-title">
     <div style="display: flex; justify-content: space-between; align-items: center;">
         <div>
             <h1>Ringkasan Operasional</h1>
             <p>Selamat datang kembali, berikut pantauan properti Anda hari ini.</p>
         </div>
-        <button class="btn-primary">
-            <i class="fa-solid fa-plus"></i>
-            Tambah Kamar Baru
-        </button>
     </div>
 </div>
 
@@ -57,7 +68,7 @@
         </div>
         <div class="stat-info">
             <h3>PENDAPATAN (BULAN INI)</h3>
-            <div class="value">Rp {{ number_format($pendapatanBulanIni / 1_000_000, 1) }}JT</div>
+            <div class="value">{{ formatRupiahShort($pendapatanBulanIni) }}</div>
             <div style="font-size: 0.7rem; margin-top: 0.4rem; color: {{ $persenPerubahan >= 0 ? 'var(--success)' : 'var(--danger)' }};">
                 <i class="fa-solid fa-arrow-{{ $persenPerubahan >= 0 ? 'up' : 'down' }}"></i> {{ $persenPerubahan >= 0 ? '+' : '' }}{{ $persenPerubahan }}% vs bulan lalu
             </div>
@@ -109,7 +120,7 @@
                     <div style="font-size: 0.9rem; font-weight: 600;">{{ $jt->nama }}</div>
                     <div style="font-size: 0.7rem; color: var(--text-muted);">{{ \Carbon\Carbon::parse($jt->tgl_jatuh_tempo)->format('d M Y') }}</div>
                 </div>
-                <div style="font-weight: 700; font-size: 0.9rem;">Rp {{ number_format($jt->kamar->harga_sewa / 1_000_000, 1) }}jt</div>
+                <div style="font-weight: 700; font-size: 0.9rem;">{{ formatRupiahShort($jt->kamar->harga_sewa) }}</div>
             </div>
             @empty
             <div style="text-align: center; padding: 1rem; color: var(--text-muted); font-size: 0.85rem;">
@@ -117,7 +128,7 @@
             </div>
             @endforelse
         </div>
-        <a href="#" style="display: block; text-align: center; color: var(--secondary); font-size: 0.8rem; font-weight: 600; margin-top: 1.5rem; text-decoration: none;">Lihat Semua Penagihan</a>
+        <a href="/tempo" style="display: block; text-align: center; color: var(--secondary); font-size: 0.8rem; font-weight: 600; margin-top: 1.5rem; text-decoration: none;">Lihat Semua Penagihan</a>
     </div>
 </div>
 
@@ -133,7 +144,6 @@
                     <th>WAKTU</th>
                     <th>AKTIVITAS</th>
                     <th>STATUS</th>
-                    <th>AKSI</th>
                 </tr>
             </thead>
             <tbody>
@@ -149,11 +159,10 @@
                     <td>
                         <span class="badge {{ $at->warna_badge }}">{{ $at->status_badge }}</span>
                     </td>
-                    <td><a href="{{ $at->url_aksi ?? '#' }}" style="color: var(--primary); font-weight: 600; text-decoration: none;">Detail</a></td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                    <td colspan="3" style="text-align: center; padding: 2rem; color: var(--text-muted);">
                         Belum ada aktivitas transaksi.
                     </td>
                 </tr>

@@ -141,6 +141,11 @@
                     @error('password')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
+                    <div class="text-right mt-1">
+                        <a href="{{ route('password.request') }}" class="text-xs font-semibold text-cyan-600 hover:text-cyan-800 transition-colors">
+                            Lupa Password?
+                        </a>
+                    </div>
                 </div>
 
                 <div class="flex items-center">

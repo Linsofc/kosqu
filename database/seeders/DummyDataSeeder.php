@@ -7,6 +7,7 @@ use App\Models\Penghuni;
 use App\Models\Transaksi;
 use App\Models\Aktivitas;
 use App\Models\Pengumuman;
+use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -36,10 +37,12 @@ class DummyDataSeeder extends Seeder
 
         // 2. Penghuni (25 data)
         $penghunis = [];
+        $tempoOptions = [1, 1, 1, 2, 3, 6, 6, 12]; // weighted towards 1 month
         for ($i = 1; $i <= 25; $i++) {
             $kamar = $kamars->where('status', 'Tersedia')->random();
             $tglMasuk = $faker->dateTimeBetween('-1 year', '-1 month');
             $tglMasukCarbon = Carbon::instance($tglMasuk);
+            $tempoPeriode = $faker->randomElement($tempoOptions);
             
             $penghuni = Penghuni::create([
                 'id_kamar' => $kamar->id,
@@ -50,6 +53,7 @@ class DummyDataSeeder extends Seeder
                 'tgl_masuk' => $tglMasukCarbon->format('Y-m-d'),
                 'tgl_jatuh_tempo' => $tglMasukCarbon->copy()->addMonths($faker->numberBetween(1, 12))->format('Y-m-d'),
                 'jumlah_tagihan' => $kamar->harga_sewa,
+                'tempo_periode' => $tempoPeriode,
                 'status' => 'Aktif',
             ]);
             
@@ -124,6 +128,20 @@ class DummyDataSeeder extends Seeder
                 'warna_badge' => $warnaBadge,
                 'created_at' => $faker->dateTimeBetween('-1 month', 'now'),
             ]);
+        }
+
+        // 6. Settings (defaults - will be seeded by migration, but re-seed to ensure)
+        $defaults = [
+            'fonnte_token' => '',
+            'tempo_periode' => '1',
+            'wa_reminder_enabled' => 'true',
+            'wa_reminder_days_before' => '7',
+            'wa_reminder_template' => 'Halo {nama}, kami dari pengelola KOSQU mengingatkan bahwa pembayaran sewa kamar {kamar} Anda sebesar Rp {tagihan} akan jatuh tempo pada {tanggal} ({sisa_hari} hari lagi). Mohon segera lakukan pembayaran. Terima kasih 🙏',
+            'wa_overdue_template' => 'Halo {nama}, pembayaran sewa kamar {kamar} Anda sebesar Rp {tagihan} telah melewati jatuh tempo pada {tanggal}. Mohon segera lakukan pembayaran untuk menghindari denda. Terima kasih 🙏',
+        ];
+
+        foreach ($defaults as $key => $value) {
+            Setting::set($key, $value);
         }
     }
 }

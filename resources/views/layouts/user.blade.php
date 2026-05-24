@@ -30,41 +30,41 @@
             <li class="nav-item">
                 <a href="{{ route('user.invoice') }}" class="nav-link {{ request()->routeIs('user.invoice') ? 'active' : '' }}">
                     <i class="fa-solid fa-file-invoice"></i>
-                    Invoices
+                    Kwitansi
                 </a>
             </li>
             <li class="nav-item">
                 <a href="{{ route('user.payment') }}" class="nav-link {{ request()->routeIs('user.payment') ? 'active' : '' }}">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
-                    Payment
+                    Pembayaran
                 </a>
             </li>
             <li class="nav-item">
                 <a href="{{ route('user.history') }}" class="nav-link {{ request()->routeIs('user.history') ? 'active' : '' }}">
                     <i class="fa-solid fa-clock-rotate-left"></i>
-                    History
+                    Riwayat
                 </a>
             </li>
             <li class="nav-item">
                 <a href="{{ route('user.profile') }}" class="nav-link {{ request()->routeIs('user.profile') ? 'active' : '' }}">
                     <i class="fa-regular fa-user"></i>
-                    Profile
+                    Profil
                 </a>
             </li>
         </ul>
 
         <div class="sidebar-footer">
             <li class="nav-item" style="list-style: none;">
-                <a href="#" class="nav-link">
+                <a href="{{ route('user.help') }}" class="nav-link {{ request()->routeIs('user.help') ? 'active' : '' }}">
                     <i class="fa-regular fa-circle-question"></i>
-                    Help Center
+                    Pusat Bantuan
                 </a>
             </li>
             <li class="nav-item" style="list-style: none;">
                 <a href="{{ route('logout') }}" class="nav-link" 
                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                     <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                    Logout
+                    Keluar
                 </a>
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                     @csrf
@@ -75,22 +75,15 @@
 
     <div class="main-content">
         <header>
-            <div class="search-bar">
-                <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted); font-size: 0.9rem;"></i>
-                <input type="text" placeholder="Cari informasi...">
-            </div>
+            <div style="flex-grow: 1;"></div>
             
             <div class="header-right">
-                <div class="notification-btn">
-                    <i class="fa-regular fa-bell"></i>
-                </div>
-
-                <div class="notification-btn">
-                    <i class="fa-regular fa-circle-question"></i>
-                </div>
-
                 <div class="user-profile">
-                    <img src="{{ asset('images/admin-profile.jpg') }}" alt="Profile" class="profile-img" style="border-radius: 50%; border: none;">
+                    <div style="text-align: right;">
+                        <div style="font-weight: 700; font-size: 0.95rem; color: #1E293B;">{{ auth('penghuni')->user()->nama ?? 'Penghuni' }}</div>
+                        <div style="font-size: 0.8rem; color: #94A3B8;">Kamar {{ auth('penghuni')->user()->kamar->nomor_kamar ?? '-' }}</div>
+                    </div>
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #0A9396); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 0.85rem;">{{ strtoupper(substr(auth('penghuni')->user()->nama ?? 'U', 0, 2)) }}</div>
                 </div>
             </div>
         </header>

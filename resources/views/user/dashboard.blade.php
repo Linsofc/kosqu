@@ -38,17 +38,32 @@
     </div>
 
     <div class="stat-card">
-        <div class="stat-icon" style="background: {{ $sudahBayarBulanIni ? '#ECFDF5' : '#FEF2F2' }}; color: {{ $sudahBayarBulanIni ? '#10B981' : '#DC2626' }};">
-            <i class="fa-solid {{ $sudahBayarBulanIni ? 'fa-check-double' : 'fa-circle-exclamation' }}"></i>
+        <div class="stat-icon" style="background: {{ $statusPembayaran === 'Lunas' ? '#ECFDF5' : ($statusPembayaran === 'Cicilan' ? '#FFFBEB' : '#FEF2F2') }}; color: {{ $statusPembayaran === 'Lunas' ? '#10B981' : ($statusPembayaran === 'Cicilan' ? '#D97706' : '#DC2626') }};">
+            <i class="fa-solid {{ $statusPembayaran === 'Lunas' ? 'fa-check-double' : ($statusPembayaran === 'Cicilan' ? 'fa-hourglass-half' : 'fa-circle-exclamation') }}"></i>
         </div>
         <div class="stat-info">
-            <h3>PEMBAYARAN BULAN INI</h3>
-            <div class="value" style="color: {{ $sudahBayarBulanIni ? '#10B981' : '#DC2626' }};">
-                {{ $sudahBayarBulanIni ? 'Lunas' : 'Belum Lunas' }}
+            <h3>STATUS PEMBAYARAN</h3>
+            <div class="value" style="color: {{ $statusPembayaran === 'Lunas' ? '#10B981' : ($statusPembayaran === 'Cicilan' ? '#D97706' : '#DC2626') }};">
+                {{ $statusPembayaran }}
             </div>
+            @if($statusPembayaran === 'Cicilan')
+            <div style="margin-top: 0.5rem;">
+                <div style="height: 6px; background: #E2E8F0; border-radius: 3px; overflow: hidden;">
+                    <div style="width: {{ $progressPersen }}%; height: 100%; background: linear-gradient(90deg, #D97706, #F59E0B); border-radius: 3px;"></div>
+                </div>
+                <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.3rem; font-weight: 600;">
+                    Rp {{ number_format($totalDibayar, 0, ',', '.') }} / Rp {{ number_format($totalTagihan, 0, ',', '.') }}
+                </div>
+            </div>
+            @elseif($statusPembayaran === 'Lunas')
             <div style="font-size: 0.75rem; margin-top: 0.4rem; color: var(--text-muted); font-weight: 600;">
-                {{ $sudahBayarBulanIni ? 'Terima kasih! Semua tagihan beres.' : 'Silakan lakukan pembayaran segera.' }}
+                Terima kasih! Semua tagihan beres.
             </div>
+            @else
+            <div style="font-size: 0.75rem; margin-top: 0.4rem; color: var(--text-muted); font-weight: 600;">
+                Silakan lakukan pembayaran segera.
+            </div>
+            @endif
         </div>
     </div>
 </div>
@@ -89,9 +104,9 @@
                 <button class="btn-primary" style="flex: 2; justify-content: center; padding: 0.8rem 1rem;" disabled>
                     <i class="fa-solid fa-clock"></i> Sedang Diperiksa
                 </button>
-                <button style="flex: 1; background: #FFF; border: 1px solid #E2E8F0; color: var(--text-muted); font-weight: 600; border-radius: 8px; cursor: pointer; transition: 0.2s;">
+                <a href="{{ route('user.invoice') }}" style="flex: 1; background: #FFF; border: 1px solid #E2E8F0; color: var(--text-muted); font-weight: 600; border-radius: 8px; cursor: pointer; transition: 0.2s; text-decoration: none; display: flex; align-items: center; justify-content: center; padding: 0.8rem 1rem;">
                     Detail
-                </button>
+                </a>
             </div>
             @else
             <div style="text-align: center; padding: 2rem 1rem; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 1rem;">
@@ -103,9 +118,9 @@
                     <div style="font-size: 0.8rem; color: var(--text-muted);">Semua pembayaran Anda sudah divalidasi.</div>
                 </div>
                 @if(!$sudahBayarBulanIni)
-                <button class="btn-primary" style="margin-top: 1rem;">
+                <a href="{{ route('user.payment') }}" class="btn-primary" style="margin-top: 1rem; text-decoration: none;">
                     <i class="fa-solid fa-plus"></i> Buat Laporan Bayar
-                </button>
+                </a>
                 @endif
             </div>
             @endif
@@ -139,11 +154,13 @@
             @endforelse
         </div>
 
+        @if($totalPengumuman > 10)
         <div style="border-top: 1px solid #E2E8F0; margin-top: 1.5rem; padding-top: 1rem; text-align: center;">
-            <a href="#" style="font-size: 0.8rem; font-weight: 600; color: var(--secondary); text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                Lihat Semua Pengumuman <i class="fa-solid fa-arrow-right"></i>
+            <a href="{{ route('user.pengumuman') }}" style="font-size: 0.8rem; font-weight: 600; color: var(--secondary); text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                Lihat Semua Pengumuman ({{ $totalPengumuman }}) <i class="fa-solid fa-arrow-right"></i>
             </a>
         </div>
+        @endif
     </div>
     
 </div>

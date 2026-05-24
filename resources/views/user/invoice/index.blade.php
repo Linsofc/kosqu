@@ -129,13 +129,29 @@
                         <span class="badge {{ $badgeClass }}">{{ $statusText }}</span>
                     </td>
                     <td style="padding: 1rem 0.5rem;">
+                        @php
+                            $isImage = false;
+                            $buktiUrl = '';
+                            if ($inv->bukti_transfer && str_contains($inv->bukti_transfer, '/')) {
+                                $isImage = true;
+                                $buktiUrl = asset('storage/' . $inv->bukti_transfer);
+                            } else {
+                                $buktiUrl = $inv->bukti_transfer;
+                            }
+                        @endphp
                         <div style="display: flex; justify-content: center; gap: 0.5rem;">
-                            <button class="btn-action-view" title="Lihat Detail">
+                            <button type="button" class="btn-action-view" title="Lihat Detail" onclick="showInvoiceDetail('{{ $inv->id }}', '{{ $inv->bulan_tagihan }}', '{{ number_format($inv->jumlah_bayar, 0, ',', '.') }}', '{{ $isImage ? $buktiUrl : '' }}', '{{ !$isImage ? $buktiUrl : '' }}', '{{ $statusText }}')">
                                 <i class="fa-solid fa-eye"></i>
                             </button>
-                            <button class="btn-action-download" title="Cetak PDF">
-                                <i class="fa-solid fa-download"></i>
-                            </button>
+                            @if($inv->status_validasi === 'Valid')
+                                <a href="{{ route('user.invoice.pdf', $inv->id) }}" class="btn-action-download" title="Unduh Kwitansi PDF">
+                                    <i class="fa-solid fa-download"></i>
+                                </a>
+                            @else
+                                <button class="btn-action-download" title="Kwitansi belum tersedia" style="opacity: 0.5; cursor: not-allowed;">
+                                    <i class="fa-solid fa-download"></i>
+                                </button>
+                            @endif
                         </div>
                     </td>
                 </tr>
@@ -156,4 +172,38 @@
         </table>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    function showInvoiceDetail(id, bulan, jumlah, imageUrl, textValue, status) {
+        let imageHtml = imageUrl ? `<img src="${imageUrl}" style="max-width: 100%; max-height: 300px; border-radius: 8px; margin-top: 10px; border: 1px solid #e2e8f0;">` : `<div style="padding: 20px; background: #f1f5f9; border-radius: 8px; margin-top: 10px; color: #64748b;">${textValue || '(Tidak ada bukti transfer)'}</div>`;
+        
+        Swal.fire({
+            title: 'Detail Transaksi #TRX-' + id,
+            html: `
+                <div style="text-align: left; font-size: 0.9rem;">
+                    <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0; margin-bottom: 0.5rem;">
+                        <span style="color: #64748b;">Bulan Tagihan</span>
+                        <span style="font-weight: 600;">${bulan}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0; margin-bottom: 0.5rem;">
+                        <span style="color: #64748b;">Jumlah Bayar</span>
+                        <span style="font-weight: 600; color: #2563eb;">Rp ${jumlah}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0; margin-bottom: 0.5rem;">
+                        <span style="color: #64748b;">Status</span>
+                        <span style="font-weight: 600;">${status}</span>
+                    </div>
+                    <div style="margin-top: 1rem; text-align: center;">
+                        <span style="color: #64748b; font-size: 0.8rem; font-weight: 600;">BUKTI TRANSFER</span><br>
+                        ${imageHtml}
+                    </div>
+                </div>
+            `,
+            showCloseButton: true,
+            showConfirmButton: false
+        });
+    }
+</script>
 @endsection

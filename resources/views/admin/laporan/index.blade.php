@@ -117,11 +117,17 @@
         <p>Ringkasan pendapatan dan performa bisnis kos Anda.</p>
     </div>
 
-    <button onclick="window.print()" class="no-print"
-        style="padding: 0.75rem 1.5rem; background: #1E293B; color: white; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
-        <i class="fa-solid fa-print"></i>
-        Cetak Laporan
-    </button>
+    <div style="display: flex; gap: 1rem;" class="no-print">
+        <a href="{{ route('laporan.export', ['year' => $year, 'month' => $month]) }}" class="btn-primary" style="padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 12px; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-file-pdf"></i>
+            Unduh PDF
+        </a>
+        <button onclick="window.print()"
+            style="padding: 0.75rem 1.5rem; background: #1E293B; color: white; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-print"></i>
+            Cetak Laporan
+        </button>
+    </div>
 </div>
 
 <div
@@ -165,17 +171,14 @@
 </div>
 
 <div class="widget filter-section" style="margin-bottom: 2rem; padding: 1.5rem;">
-    <form action="{{ route('laporan.index') }}" method="GET"
-        style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
-
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
         <div style="min-width: 150px;">
             <label
                 style="display: block; font-size: 0.75rem; font-weight: 700; color: #64748B; margin-bottom: 0.5rem; text-transform: uppercase;">
                 Pilih Tahun
             </label>
 
-            <select name="year" onchange="this.form.submit()"
-                style="width: 100%; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #E2E8F0; outline: none; font-size: 0.9rem; background: white;">
+            <select id="filter-year" style="width: 100%; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #E2E8F0; outline: none; font-size: 0.9rem; background: white; cursor: pointer;">
 
                 @foreach($years as $y)
                     <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>
@@ -191,8 +194,7 @@
                 Pilih Bulan
             </label>
 
-            <select name="month" onchange="this.form.submit()"
-                style="width: 100%; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #E2E8F0; outline: none; font-size: 0.9rem; background: white;">
+            <select id="filter-month" style="width: 100%; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #E2E8F0; outline: none; font-size: 0.9rem; background: white; cursor: pointer;">
 
                 <option value="">Semua Bulan</option>
 
@@ -204,11 +206,25 @@
             </select>
         </div>
 
-        <a href="{{ route('laporan.index') }}"
-            style="padding: 0.75rem 1.5rem; border-radius: 10px; background: #F1F5F9; color: #475569; text-decoration: none; font-weight: 600; font-size: 0.9rem;">
-            Reset Filter
-        </a>
-    </form>
+        <button type="button" onclick="resetFilters()" style="padding: 0.75rem 1.5rem; border: none; border-radius: 10px; background: #F1F5F9; color: #475569; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: 0.2s;">
+            <i class="fa-solid fa-rotate-right"></i> Reset Filter
+        </button>
+        <button type="button" onclick="exportPdf()" style="padding: 0.75rem 1.5rem; border: none; border-radius: 10px; background: #DC2626; color: white; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: 0.2s; margin-left: auto;">
+            <i class="fa-solid fa-file-pdf"></i> Export PDF
+        </button>
+    </div>
+</div>
+
+<div class="widget" style="margin-bottom: 2rem; padding: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h3 style="font-weight: 800; color: #1E293B;">
+            <i class="fa-solid fa-chart-bar" style="color: var(--primary); margin-right: 0.5rem;"></i>
+            Grafik Pendapatan Bulanan <span id="chart-year">{{ $year }}</span>
+        </h3>
+    </div>
+    <div style="height: 300px;">
+        <canvas id="revenueChart"></canvas>
+    </div>
 </div>
 
 <div class="widget">
@@ -219,14 +235,12 @@
             Rincian Transaksi Valid
         </h3>
 
-        <span
-            style="font-size: 0.85rem; color: #64748B; font-weight: 600; background: #F1F5F9; padding: 0.25rem 0.75rem; border-radius: 20px;">
-
+        <span id="transaksi-count" style="font-size: 0.85rem; color: #64748B; font-weight: 600; background: #F1F5F9; padding: 0.25rem 0.75rem; border-radius: 20px;">
             {{ $transaksis->count() }} Transaksi
         </span>
     </div>
 
-    <div style="overflow-x: auto;">
+    <div>
         <table class="data-table" style="width: 100%; border-collapse: collapse;">
             <thead>
                 <tr style="text-align: left; border-bottom: 1px solid #E2E8F0;">
@@ -239,68 +253,178 @@
                 </tr>
             </thead>
 
-            <tbody>
-                @forelse($transaksis as $t)
-                    <tr style="border-bottom: 1px solid #F1F5F9;">
-                        <td style="padding: 1rem; font-weight: 600; color: #64748B;">
-                            #TRX-{{ $t->id }}
-                        </td>
-
-                        <td style="padding: 1rem;">
-                            {{ $t->created_at->format('d/m/Y') }}
-                        </td>
-
-                        <td style="padding: 1rem;">
-                            <div style="font-weight: 700; color: #1E293B;">
-                                {{ $t->penghuni->nama }}
-                            </div>
-                        </td>
-
-                        <td style="padding: 1rem;">
-                            <span
-                                style="font-weight: 600; color: #2563EB; background: #EFF6FF; padding: 0.2rem 0.5rem; border-radius: 6px;">
-                                {{ $t->penghuni->kamar->nomor_kamar }}
-                            </span>
-                        </td>
-
-                        <td style="padding: 1rem;">
-                            {{ $t->bulan_tagihan }}
-                        </td>
-
-                        <td style="padding: 1rem; font-weight: 700; color: #059669;">
-                            Rp {{ number_format($t->jumlah_bayar, 0, ',', '.') }}
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6"
-                            style="text-align: center; padding: 4rem 2rem; color: #94A3B8;">
-
-                            <i class="fa-solid fa-receipt"
-                                style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.2;"></i>
-
-                            <p>Tidak ada transaksi valid ditemukan untuk periode ini.</p>
-                        </td>
-                    </tr>
-                @endforelse
+            <tbody id="laporan-tbody" style="transition: opacity 0.2s;">
+                @include('admin.laporan._table_rows', ['transaksis' => $transaksis])
             </tbody>
 
-            @if($transaksis->isNotEmpty())
-                <tfoot>
-                    <tr style="background: #F8FAFC; font-weight: 800;">
-                        <td colspan="5"
-                            style="padding: 1rem; text-align: right; border-top: 1px solid #E2E8F0;">
-                            TOTAL PERIODE INI
-                        </td>
+            <tfoot id="laporan-tfoot" style="{{ $transaksis->isEmpty() ? 'display: none;' : '' }}">
+                <tr style="background: #F8FAFC; font-weight: 800;">
+                    <td colspan="5"
+                        style="padding: 1rem; text-align: right; border-top: 1px solid #E2E8F0;">
+                        TOTAL PERIODE INI
+                    </td>
 
-                        <td
-                            style="padding: 1rem; color: #059669; border-top: 1px solid #E2E8F0;">
-                            Rp {{ number_format($transaksis->sum('jumlah_bayar'), 0, ',', '.') }}
-                        </td>
-                    </tr>
-                </tfoot>
-            @endif
+                    <td id="total-filtered" style="padding: 1rem; color: #059669; border-top: 1px solid #E2E8F0;">
+                        Rp {{ number_format($transaksis->sum('jumlah_bayar'), 0, ',', '.') }}
+                    </td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </div>
+@endsection
+
+@section('styles')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+@endsection
+
+@section('scripts')
+<script>
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const monthlyData = @json($monthlyData);
+    let chartInstance = null;
+    
+    function initChart(data) {
+        if(chartInstance) {
+            chartInstance.destroy();
+        }
+
+        const chartData = Array(12).fill(0);
+        data.forEach(item => {
+            chartData[item.month - 1] = item.total;
+        });
+
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, 'rgba(0, 136, 168, 0.8)');
+        gradient.addColorStop(1, 'rgba(10, 147, 150, 0.3)');
+
+        chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'Pendapatan (Rp)',
+                    data: chartData,
+                    backgroundColor: gradient,
+                    borderColor: 'rgba(0, 136, 168, 1)',
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Rp ' + context.raw.toLocaleString('id-ID');
+                            }
+                        },
+                        backgroundColor: '#1E293B',
+                        titleFont: { weight: '700' },
+                        padding: 12,
+                        cornerRadius: 10,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#F1F5F9' },
+                        ticks: {
+                            callback: function(value) {
+                                if (value >= 1000000) return 'Rp ' + (value / 1000000).toFixed(1) + 'jt';
+                                if (value >= 1000) return 'Rp ' + (value / 1000).toFixed(0) + 'rb';
+                                return 'Rp ' + value;
+                            },
+                            font: { weight: '600', size: 11 },
+                            color: '#94A3B8',
+                        }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            font: { weight: '600', size: 12 },
+                            color: '#64748B',
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    initChart(monthlyData);
+
+    const filterYear = document.getElementById('filter-year');
+    const filterMonth = document.getElementById('filter-month');
+    const tbody = document.getElementById('laporan-tbody');
+    const tfoot = document.getElementById('laporan-tfoot');
+    const totalFiltered = document.getElementById('total-filtered');
+    const transaksiCount = document.getElementById('transaksi-count');
+    const chartYearLabel = document.getElementById('chart-year');
+
+    filterYear.addEventListener('change', () => fetchData());
+    filterMonth.addEventListener('change', () => fetchData());
+
+    function fetchData() {
+        const year = filterYear.value;
+        const month = filterMonth.value;
+
+        tbody.style.opacity = '0.5';
+
+        const params = new URLSearchParams();
+        if (year) params.append('year', year);
+        if (month) params.append('month', month);
+
+        const url = `{{ route('laporan.index') }}?${params.toString()}`;
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            tbody.innerHTML = data.html;
+            
+            if(data.totalCount > 0) {
+                tfoot.style.display = 'table-footer-group';
+                totalFiltered.innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(data.totalFiltered);
+            } else {
+                tfoot.style.display = 'none';
+            }
+
+            transaksiCount.innerText = data.totalCount + ' Transaksi';
+            chartYearLabel.innerText = year;
+            
+            initChart(data.monthlyData);
+            
+            tbody.style.opacity = '1';
+        })
+        .catch(err => {
+            console.error('Fetch error:', err);
+            tbody.style.opacity = '1';
+        });
+    }
+
+    function resetFilters() {
+        filterYear.value = new Date().getFullYear().toString();
+        filterMonth.value = '';
+        fetchData();
+    }
+
+    function exportPdf() {
+        const year = filterYear.value;
+        const month = filterMonth.value;
+        const params = new URLSearchParams();
+        if (year) params.append('year', year);
+        if (month) params.append('month', month);
+        
+        window.location.href = `{{ route('laporan.export') }}?${params.toString()}`;
+    }
+</script>
 @endsection

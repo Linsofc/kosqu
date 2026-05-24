@@ -100,35 +100,32 @@
 
 {{-- Filter Widget --}}
 <div class="widget" style="margin-bottom: 2rem;">
-    <form action="{{ route('transaksi.index') }}" method="GET" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
         <div style="flex-grow: 1; min-width: 250px;">
             <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase;">Cari Transaksi</label>
             <div style="position: relative;">
                 <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem;"></i>
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="ID Transaksi atau Nama Penghuni..." style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; border-radius: 10px; border: 1px solid #E2E8F0; outline: none; font-size: 0.9rem;">
+                <input type="text" id="search-input" value="{{ request('search') }}" placeholder="ID Transaksi atau Nama Penghuni..." style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; border-radius: 10px; border: 1px solid #E2E8F0; outline: none; font-size: 0.9rem;">
             </div>
         </div>
-        <div>
+        <div style="min-width: 180px;">
             <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase;">Status</label>
-            <select name="status" onchange="this.form.submit()" style="padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #E2E8F0; outline: none; font-size: 0.9rem; background: white;">
-                <option value="">Semua Status</option>
-                <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending (Menunggu)</option>
-                <option value="Valid" {{ request('status') == 'Valid' ? 'selected' : '' }}>Valid (Diterima)</option>
-                <option value="Ditolak" {{ request('status') == 'Ditolak' ? 'selected' : '' }}>Ditolak</option>
+            <select id="filter-status" style="width: 100%; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #E2E8F0; outline: none; font-size: 0.9rem; background: white; cursor: pointer;">
+                <option value="Semua">Semua Status</option>
+                <option value="Pending">Pending (Menunggu)</option>
+                <option value="Valid">Valid (Diterima)</option>
+                <option value="Ditolak">Ditolak</option>
             </select>
         </div>
-        <button type="submit" class="btn-primary" style="padding: 0.75rem 1.5rem; border-radius: 10px;">
-            <i class="fa-solid fa-filter"></i> Filter
+        <button type="button" id="btn-reset" onclick="resetFilters()" class="btn-reset">
+            <i class="fa-solid fa-rotate-right"></i> Reset
         </button>
-        <a href="{{ route('transaksi.index') }}" class="btn-reset">
-            <i class="fa-solid fa-rotate"></i> Reset
-        </a>
-    </form>
+    </div>
 </div>
 
 {{-- Table Widget --}}
 <div class="widget">
-    <div style="overflow-x: auto;">
+    <div>
         <table class="data-table" style="width: 100%; border-collapse: collapse;">
             <thead>
                 <tr style="text-align: left; border-bottom: 1px solid #E2E8F0;">
@@ -141,76 +138,13 @@
                     <th style="text-align: center; padding: 1rem 0.5rem;">AKSI</th>
                 </tr>
             </thead>
-            <tbody>
-                @forelse($transaksis as $trx)
-                <tr style="border-bottom: 1px solid #F1F5F9;">
-                    <td style="padding: 1rem 0.5rem;">
-                        <span style="font-weight: 700; color: var(--primary); font-family: 'Courier New', monospace;">#TRX-{{ $trx->id }}</span>
-                    </td>
-                    <td style="padding: 1rem 0.5rem;">
-                        <div style="font-weight: 600; color: var(--text-main);">{{ $trx->penghuni->nama ?? 'N/A' }}</div>
-                        <div style="font-size: 0.7rem; color: var(--text-muted);">Kamar {{ $trx->penghuni->kamar->nomor_kamar ?? '-' }}</div>
-                    </td>
-                    <td style="padding: 1rem 0.5rem;">
-                        <div style="font-size: 0.9rem; font-weight: 500;">{{ $trx->bulan_tagihan }}</div>
-                        <div style="font-size: 0.7rem; color: var(--text-muted);">Dibuat: {{ $trx->created_at->format('d/m/Y') }}</div>
-                    </td>
-                    <td style="padding: 1rem 0.5rem;">
-                        <div style="font-weight: 700; color: #10B981;">Rp {{ number_format($trx->jumlah_bayar, 0, ',', '.') }}</div>
-                    </td>
-                    <td style="padding: 1rem 0.5rem;">
-                        @if($trx->bukti_transfer)
-                            <button onclick="viewProof('{{ asset('storage/' . $trx->bukti_transfer) }}', '#TRX-{{ $trx->id }}')" class="btn-proof">
-                                <i class="fa-solid fa-image"></i> Lihat Bukti
-                            </button>
-                        @else
-                            <span style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">No Proof</span>
-                        @endif
-                    </td>
-                    <td style="padding: 1rem 0.5rem;">
-                        @php
-                            $badgeClass = 'badge-warning';
-                            if($trx->status_validasi == 'Valid') $badgeClass = 'badge-success';
-                            if($trx->status_validasi == 'Ditolak') $badgeClass = 'badge-danger';
-                        @endphp
-                        <span class="badge {{ $badgeClass }}">{{ $trx->status_validasi }}</span>
-                    </td>
-                    <td style="padding: 1rem 0.5rem;">
-                        <div style="display: flex; justify-content: center; gap: 0.5rem;">
-                            @if($trx->status_validasi == 'Pending')
-                                <form action="{{ route('transaksi.validasi', $trx->id) }}" method="POST" style="display: inline;">
-                                    @csrf
-                                    <input type="hidden" name="status" value="Valid">
-                                    <button type="submit" class="btn-accept" title="Terima Pembayaran">
-                                        <i class="fa-solid fa-check"></i>
-                                    </button>
-                                </form>
-                                <form action="{{ route('transaksi.validasi', $trx->id) }}" method="POST" style="display: inline;">
-                                    @csrf
-                                    <input type="hidden" name="status" value="Ditolak">
-                                    <button type="submit" class="action-btn" style="background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;" title="Tolak Pembayaran">
-                                        <i class="fa-solid fa-xmark"></i>
-                                    </button>
-                                </form>
-                            @else
-                                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Selesai</span>
-                            @endif
-                        </div>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="7" style="text-align: center; padding: 4rem 2rem;">
-                        <i class="fa-solid fa-receipt" style="font-size: 3rem; color: #CBD5E1; margin-bottom: 1rem; display: block; opacity: 0.3;"></i>
-                        <p style="color: var(--text-muted); font-weight: 500;">Tidak ada data transaksi ditemukan.</p>
-                    </td>
-                </tr>
-                @endforelse
+            <tbody id="transaksi-tbody" style="transition: opacity 0.2s;">
+                @include('admin.transaksi._table_rows', ['transaksis' => $transaksis])
             </tbody>
         </table>
     </div>
 
-    <div style="margin-top: 1.5rem;">
+    <div id="pagination-container" style="margin-top: 1.5rem;">
         {{ $transaksis->links() }}
     </div>
 </div>
@@ -254,5 +188,67 @@
             closeProofModal();
         }
     }
+
+    let searchTimeout;
+    const searchInput = document.getElementById('search-input');
+    const filterStatus = document.getElementById('filter-status');
+    const tbody = document.getElementById('transaksi-tbody');
+    const paginationContainer = document.getElementById('pagination-container');
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => fetchData(), 300);
+    });
+
+    filterStatus.addEventListener('change', () => fetchData());
+
+    function fetchData(pageUrl = null) {
+        const search = searchInput.value.trim();
+        const status = filterStatus.value;
+
+        tbody.style.opacity = '0.5';
+
+        const params = new URLSearchParams();
+        if (search) params.append('search', search);
+        if (status !== 'Semua') params.append('status', status);
+
+        const url = pageUrl || `{{ route('transaksi.index') }}?${params.toString()}`;
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            tbody.innerHTML = data.html;
+            paginationContainer.innerHTML = data.pagination;
+            tbody.style.opacity = '1';
+            attachPaginationEvents();
+        })
+        .catch(err => {
+            console.error('Fetch error:', err);
+            tbody.style.opacity = '1';
+        });
+    }
+
+    function resetFilters() {
+        searchInput.value = '';
+        filterStatus.value = 'Semua';
+        fetchData();
+    }
+
+    function attachPaginationEvents() {
+        const links = paginationContainer.querySelectorAll('a');
+        links.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                fetchData(this.href);
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', attachPaginationEvents);
 </script>
 @endsection

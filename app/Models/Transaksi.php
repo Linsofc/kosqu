@@ -14,6 +14,7 @@ class Transaksi extends Model
     protected $fillable = [
         'id_penghuni',
         'bulan_tagihan',
+        'periode_tagihan',
         'jumlah_bayar',
         'bukti_transfer',
         'tgl_bayar',
@@ -23,6 +24,6 @@ class Transaksi extends Model
 
     public function penghuni()
     {
-        return $this->belongsTo(Penghuni::class, 'id_penghuni');
+        return $this->belongsTo(Penghuni::class, 'id_penghuni')->withTrashed();
     }
 }
