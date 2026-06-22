@@ -72,7 +72,7 @@
     
     <div class="widget" style="width: 100%; display: flex; flex-direction: column;">
         <div class="widget-header">
-            <div class="widget-title">Tagihan Aktif</div>
+            <div class="widget-title">Transaksi Aktif</div>
             <i class="fa-solid fa-receipt" style="color: var(--text-muted);"></i>
         </div>
         
